@@ -125,9 +125,56 @@ When a request comes in, it is matched against the route map. When appropriate r
 
 **NOTE**: The matched route is not going to be just string or regular expression - it will assign the wrapper `Matcher` object.
 
-### Advanced topics
+### Wiring up
 
-#### router.sort
+Grace.js Router is not capable of serving and requires a wrapper function that can will wire it to `http` or `https`. Moreover, the router itself doesn't handle cases when the incoming message cannot be matched against any registered route.
+
+So, the wrapper function should use the route map withing the router **and** handle requests that didn't match any route. Otherwise, you will simply never get response back.
+
+The most simple example for such function is:
+
+```javascript
+const Router = require('@grace-js/router');
+const http = require('http');
+const https = require('https');
+const fs = require('fs');
+const path = require('path');
+
+const router = Router.withPrefix('/')
+    .get(() => {});
+
+// Accept main router as an argument and return a function that will wait for Node.js `IncomingMessage` and `ServerResponse`.
+function withRouter(router) {
+    // Enclose the router for future reference
+    return function matchRoute(req, res) {
+        // Match IncomingMessage against the route map
+        const matchedRoute = router.routeMap.find(req);
+        
+        // End response appropriately if the route was not found
+        if (!matchedRoute) {
+            res.setHeader('Content-Type', 'text/plain');
+            res.statusCode = 404;
+            return res.end(`Cannot ${req.method} ${req.url}`);
+        }
+        
+        // Execute matched route callback with proper tail call
+        return matchedRoute.callback(req, res);
+    }
+}
+
+http.createServer(withRouter(router)).listen(3000);
+
+const options = {
+  key: fs.readFileSync(path.resolve('/path/to/certificate/key.pem')),
+  cert: fs.readFileSync(path.resolve('/path/to/certificate/cert.pem')),
+};
+
+https.createServer(options, withRouter(router)).listen(3000);
+```
+
+
+
+### router.sort
 
 By default, Grace.js Router stores route definitions in the order you define them. When incoming message arrives, the router matches the request url and method against registered routes in exact same order they were registered.
 
