@@ -124,3 +124,32 @@ const apiRouter = Router.withPrefix('/api')
 When a request comes in, it is matched against the route map. When appropriate route was found, its callback is then triggered with Node.js `http.IncomingMessage` and `http.ServerResponse` objects respectively. The Grace.js Router does not amend these objects except for one tiny thing added to the `req` (IncomingMessage) which is the reference to the route matched in the router. To access that value, you will need to import the symbol identifier from Grace.js Router library.
 
 **NOTE**: The matched route is not going to be just string or regular expression - it will assign the wrapper `Matcher` object.
+
+### Advanced topics
+
+#### router.sort
+
+By default, Grace.js Router stores route definitions in the order you define them. When incoming message arrives, the router matches the request url and method against registered routes in exact same order they were registered.
+
+There is a built-in mechanism for applying route map sorting to organise matching. This is not something you would normally need except for the case when there is ambiguity in matching RegExp-based routes that go before string-based routes and the latter ones are never reached.
+
+##### Example
+
+```javascript
+Router.empty()
+    .get(/\/api\/v1\/users\/(\w+)/, (req, res) => {})
+    .get('/api/v1/users/sign-in', (req, res) => {});
+```
+
+This is probably smelly yet there are edge cases when the ambiguity is required to be in place.
+
+In this case, at the very end of your main router definition you can chain the `router.sort()` method which is executed as follows:
+
+* The complexity of all the routes is calculated:
+  * If route path is a string, the amount of slashes is added to the initial complexity (0)
+  * If route path is a regular expression, the amount of slashes is subtracted from the initial complexity value (1000000)
+* The routes are sorted based on their complexity
+
+This algorithm assures that the simplest route to match against in your application is **"/"** and should be considered the first one to match against. The most complex route in your application would be **/\\/(.\*)/** which should only be referred to as last resort if no other routes match. 
+
+**NOTE**: the initial complexity value for RegExp-based route definitions came up as an arbitrary value high enough to make an assumption that no one would ever register that many routes.
