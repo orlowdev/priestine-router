@@ -63,11 +63,11 @@ There are helper methods for defining most common HTTP verbs:
 * router.delete
 * router.head
 * router.options
-* router.all (registers routes for all the methods mentioned above)
+* router.all (registers routes for all the HTTP methods mentioned above)
 
-Each of these helper methods accept two arguments: a **route** (optional, equals *""* if omited) and a **callback function** (required).
+Each of these helper methods accept two arguments: a **route** (optional, equals *""* if omitted) and a **callback function** (required).
 
-If you need to register another HTTP method (e.g. `LINK`), you can use `router.register`. All the methods mentioned above internally use `router.register`. Unlike those helper methods, `router.register` requires three arguments:
+If you need to register another HTTP method (e.g. `LINK`), you can use `router.register`. All the methods mentioned above internally use `router.register`. Unlike those helper methods, `router.register` accepts three arguments:
 
 * a route (optional, equals *""* if omitted)
 * an array of HTTP methods to be registered (required)
