@@ -35,12 +35,12 @@ const apiRouter = Router.withPrefix('/api/v1')
   .get('/posts', (req, res) => {});
 ```
 
-#### Prefix and route path concatenation
+#### Prefix and route definition concatenation
 
-* if **prefix** is a `string` and **route path** is a `string`, the final route is a `string`
-* if **prefix** is a `string` and **route path** is a `RegExp`, the final route is a `RegExp`
-* if **prefix** is a `RegExp` and **route path** is a `string`, the final route is a `RegExp`
-* if **prefix** is a `RegExp` and **route path** is a `RegExp`, the final route is a `RegExp`
+* if **prefix** is a `string` and **route definition** is a `string`, the final route is a `string`
+* if **prefix** is a `string` and **route definition** is a `RegExp`, the final route is a `RegExp`
+* if **prefix** is a `RegExp` and **route definition** is a `string`, the final route is a `RegExp`
+* if **prefix** is a `RegExp` and **route definition** is a `RegExp`, the final route is a `RegExp`
 
 ```javascript
 Router.withPrefix('/api').get('/v1/posts', (req, res) => {}); // /api/v1/posts
@@ -67,11 +67,15 @@ There are helper methods for defining most common HTTP verbs:
 
 Each of these helper methods accept two arguments: a **route** (optional, equals *""* if omitted) and a **callback function** (required).
 
-If you need to register another HTTP method (e.g. `LINK`), you can use `router.register`. All the methods mentioned above internally use `router.register`. Unlike those helper methods, `router.register` accepts three arguments:
+If you need to register other HTTP method (e.g. `LINK`), you can use `router.register`. All the methods mentioned above internally use `router.register`. Unlike those helper methods, `router.register` accepts three arguments:
 
 * a route (optional, equals *""* if omitted)
 * an array of HTTP methods to be registered (required)
 * a callback function (required)
+
+```javascript
+router.register('/api/v1/posts', ['GET', 'POST', 'HEAD', 'OPTIONS'], (req, res) => {});
+```
 
 #### Why route is optional
 
